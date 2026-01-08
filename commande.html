@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Nouvelle Commande</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; margin:0; }
+.menu-btn { font-size: 24px; cursor: pointer; position: fixed; top: 20px; left: 20px; z-index: 1000; }
+.sidemenu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+}
+.sidemenu a {
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #f1f1f1;
+    display: block;
+    transition: 0.3s;
+}
+.sidemenu a:hover { background-color: #575757; }
+.sidemenu .closebtn {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 30px;
+}
+.container { margin-left: 0; transition: margin-left 0.3s; padding: 20px; }
+
+h1 { margin-top: 0; }
+.commande { display: flex; align-items: center; margin-bottom: 10px; }
+.commande button { width: 30px; height: 30px; font-size: 20px; cursor: pointer; }
+.quantite { width: 40px; text-align: center; margin: 0 10px; font-size: 18px; }
+.produit { margin-left: 10px; font-size: 18px; }
+#ajouterBtn { padding: 15px 25px; font-size: 18px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 8px; margin-top: 20px; }
+select, label { font-size: 16px; margin-right: 10px; }
+#recherche { font-size: 16px; padding: 5px; width: 250px; margin-bottom: 15px; }
+#pagination { margin-top: 10px; }
+#pagination button { padding: 5px 10px; margin: 0 5px; font-size: 16px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- Menu latéral -->
+<div id="sidemenu" class="sidemenu">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeMenu()">&times;</a>
+  <a href="commande.html">Nouvelle Commande</a>
+  <a href="Acces_Runner.html">Accès Runner</a>
+  <a href="Livraison.html">Livraison</a>
+  <a href="priv.html">Accès Privé</a>
+  <!-- Ajouter d'autres liens si nécessaire -->
+</div>
+
+<!-- Bouton menu -->
+<div class="menu-btn" onclick="openMenu()">☰ Menu</div>
+
+<div class="container">
+<h1>Nouvelle Commande</h1>
+
+<!-- Barre de recherche -->
+<div>
+    <label for="recherche">Rechercher un produit :</label>
+    <input type="text" id="recherche" placeholder="Rechercher..." onkeyup="filtrerProduits()">
+</div>
+
+<div id="produitsContainer"></div>
+
+<!-- Pagination -->
+<div id="pagination">
+    <button onclick="pagePrecedente()">&larr; Précédent</button>
+    <span id="pageInfo"></span>
+    <button onclick="pageSuivante()">Suivant &rarr;</button>
+</div>
+
+<div style="margin-top: 20px;">
+    <label for="endroit">Choisir l'endroit :</label>
+    <select id="endroit">
+        <option value="">-- Sélectionner --</option>
+        <option value="Poutinerie">Poutinerie</option>
+        <option value="Principale">Principale</option>
+        <option value="Bar Kepler">Bar Kepler</option>
+        <option value="Sud">Sud</option>
+        <option value="Bar Simply">Bar Simply</option>
+        <option value="Bar TDD">Bar TDD</option>
+        <option value="Zone TDD">Zone TDD</option>
+        <option value="Loges">Loges</option>
+        <option value="Rackeurs">Rackeurs</option>
+    </select>
+</div>
+
+<div style="margin-top: 10px;">
+    <label><input type="checkbox" id="urgent"> Urgent</label>
+</div>
+
+<button id="ajouterBtn" onclick="ajouterCommande()">Ajouter la commande</button>
+</div>
+
+<script>
+// Menu latéral
+function openMenu() {
+    document.getElementById("sidemenu").style.width = "250px";
+    document.querySelector(".container").style.marginLeft = "250px";
+}
+function closeMenu() {
+    document.getElementById("sidemenu").style.width = "0";
+    document.querySelector(".container").style.marginLeft = "0";
+}
+
+// Liste des produits (ordre alphabétique)
+const produits = [
+"7up","Ailes De Poulet","Alphonse","Apocalypso","Barbe À Papa","Blue Moon","Bonbon","Boite À Pizza Carré","Boite À Pizza Triangle",
+"Boulette À Burgers","Café","Céleri","Chiffon Bleu","Chips BBQ","Chips Original","Clamato","Coors Light","Coors Seltzer",
+"Contenant À Poutine","Crème","Cuillères","Couvercle À Café","Couteaux","Eau","Eau Montelier","Emballage À Burgers","Emballage À Hot-Dogs",
+"Filtre À Café","Fort Fireball","Fort Kepler Bord De Mer","Fort Kepler K","Fort Rhum Captain Morgan","Fort Retrofit Bleu","Fort Vodka Fit",
+"Fromage En Grains","Fromage à Nachos","Frites","Fut Apocalypso","Fut Mactavish","Fut Pitoune","Glace","Gatorade Bleu","Gatorade Rouge",
+"Heineken","Heineken 0%","Jus D’Orange","Jus De Canneberge","Kepler 0%","Kepler Céleste","Kepler Chili Mango","Kepler Stellaire",
+"Kit À Slush","Ketchup","Lait","Lime","Limonade","Liquide À Slush Bleue","Liquide À Slush Rouge","Liquide À Slush Verte","Mayonnaise",
+"Mactavish","Molson","Moutarde","Nachos","Napkins","Nappe","Papier Brun","Pitoune","Pain À Burgers","Pain À Hot-Dogs","Pepsi","Pepsi Diet",
+"Perroquets","Pizza Fromage","Pizza Pepperoni Fromage","Popcorn","Produit De Nettoyage","Porte-Gobelets 4 trous","Poulet Popcorns",
+"Relish","Rouleau Caisse","Rouleau TPV","Saucisse","Saucisses En Pâtes","Sauce À Poutine","Sauce À Saucisses En Pâtes","Sauce Rouge Au Poivron",
+"Sauce Worcestershire","Sels","Soda","Sterno","Sucres","Tabasco","T-44","Thé Glacé Brisk","Tonic","Verre À Bière","Verre À Café",
+"Verre À Cocktail","Verre À Vins","Vin Blanc Ciu Ciu","Vin Blanc Cliff 79","Vin Blanc Kim Crafford","Vin Blanc Mezzacorona",
+"Vin Rouge","Vin Rouge Cliff 79","Vin Rouge Mezzacorona"
+];
+
+const containerProd = document.getElementById("produitsContainer");
+const produitsParPage = 8;
+let pageActuelle = 1;
+let produitsFiltres = [...produits];
+
+// Afficher les produits selon la page
+function afficherProduits() {
+    containerProd.innerHTML = "";
+    const debut = (pageActuelle - 1) * produitsParPage;
+    const fin = debut + produitsParPage;
+    const pageProduits = produitsFiltres.slice(debut, fin);
+
+    pageProduits.forEach((nom, index) => {
+        const id = "prod" + produits.indexOf(nom); 
+        const div = document.createElement("div");
+        div.className = "commande";
+        div.innerHTML = `
+            <button onclick="changerQuantite('${id}',-1)">-</button>
+            <div id="${id}" class="quantite">0</div>
+            <button onclick="changerQuantite('${id}',1)">+</button>
+            <div class="produit">${nom}</div>
+        `;
+        containerProd.appendChild(div);
+    });
+
+    const totalPages = Math.ceil(produitsFiltres.length / produitsParPage) || 1;
+    document.getElementById("pageInfo").textContent = `Page ${pageActuelle} / ${totalPages}`;
+}
+
+function pageSuivante() {
+    const totalPages = Math.ceil(produitsFiltres.length / produitsParPage);
+    if(pageActuelle < totalPages) pageActuelle++;
+    afficherProduits();
+}
+function pagePrecedente() {
+    if(pageActuelle > 1) pageActuelle--;
+    afficherProduits();
+}
+
+function changerQuantite(id, delta){
+    const div = document.getElementById(id);
+    let qte = parseInt(div.textContent);
+    qte += delta;
+    if(qte < 0) qte = 0;
+    div.textContent = qte;
+}
+
+function ajouterCommande(){
+    const endroit = document.getElementById("endroit").value;
+    if(!endroit) return;
+
+    const urgent = document.getElementById("urgent").checked;
+    let commandes = JSON.parse(localStorage.getItem("commandes")) || [];
+    produits.forEach((nom,index)=>{
+        const qte = parseInt(document.getElementById("prod"+index)?.textContent || 0);
+        if(qte>0){
+            commandes.push({
+                id: (Date.now() + Math.random()).toString(),
+                produit: nom,
+                quantite: qte,
+                endroit,
+                urgent,
+                status:"nouveau"
+            });
+            document.getElementById("prod"+index).textContent=0;
+        }
+    });
+    document.getElementById("endroit").value="";
+    document.getElementById("urgent").checked=false;
+    document.getElementById("recherche").value="";
+    filtrerProduits();
+    localStorage.setItem("commandes", JSON.stringify(commandes));
+}
+
+function filtrerProduits() {
+    const texte = document.getElementById("recherche").value.toLowerCase();
+    produitsFiltres = produits.filter(nom => nom.toLowerCase().includes(texte));
+    pageActuelle = 1;
+    afficherProduits();
+}
+
+afficherProduits();
+</script>
+
+</body>
+</html>
