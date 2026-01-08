@@ -1,1 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon application</title>
 
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fff;
+        }
+
+        /* Bouton menu */
+        .menu-btn {
+            font-size: 20px;
+            padding: 10px;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        /* Menu latéral */
+        .menu {
+            position: fixed;
+            top: 0;
+            left: -250px; /* caché */
+            width: 250px;
+            height: 100%;
+            background-color: #333;
+            color: white;
+            transition: left 0.3s ease;
+            padding-top: 60px;
+            z-index: 999;
+        }
+
+        /* Menu visible */
+        .menu.ouvert {
+            left: 0;
+        }
+
+        .menu a {
+            display: block;
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+        }
+
+        .menu a:hover {
+            background-color: #444;
+        }
+
+        /* Image centrée */
+        .contenu img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Bouton menu -->
+    <button class="menu-btn" onclick="toggleMenu()">☰ Menu</button>
+
+    <!-- Menu gauche -->
+    <div id="menu" class="menu">
+        <a href="commande.html">Nouvelle Commande</a>
+        <a href="Acces_Runner.html">Accès Runner</a>
+        <a href="Livraison.html">Livraison</a>
+        <a href="priv.html">Accès Privé</a>
+    </div>
+
+    <!-- Contenu -->
+    <div class="contenu">
+        <img src="https://upload.wikimedia.org/wikipedia/fr/2/2f/Logo_des_Lions_de_Trois-Rivi%C3%A8res.svg" alt="Logo des Lions de Trois-Rivières">
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function toggleMenu() {
+            document.getElementById("menu").classList.toggle("ouvert");
+        }
+    </script>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { db } from "./firebase.js";
+        console.log("Firebase connecté", db);
+    </script>
+
+</body>
+</html>
