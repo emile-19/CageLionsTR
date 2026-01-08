@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Livraison</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;padding:0;}
+.menu-btn { font-size: 24px; cursor: pointer; position: fixed; top: 20px; left: 20px; z-index: 1000; }
+.sidemenu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+}
+.sidemenu a {
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #f1f1f1;
+    display: block;
+    transition: 0.3s;
+}
+.sidemenu a:hover { background-color: #575757; }
+.sidemenu .closebtn { position: absolute; top: 20px; right: 25px; font-size: 30px; }
+.container { margin-left: 0; transition: margin-left 0.3s; padding: 20px; }
+
+h1{margin-bottom:20px;}
+label,select{font-size:16px;margin-right:10px;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+th,td{border:1px solid #ccc;padding:10px;text-align:left;}
+.urgent{color:red;font-weight:bold;}
+.encours{background-color:#d4edda;} /* vert clair */
+.btn{padding:5px 10px;margin-right:5px;border:none;border-radius:5px;cursor:pointer;}
+.btn-annuler{background-color:#dc3545;color:white;}
+.status{font-weight:bold;}
+</style>
+</head>
+<body>
+
+<!-- Menu latéral -->
+<div id="sidemenu" class="sidemenu">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeMenu()">&times;</a>
+  <a href="commande.html">Nouvelle Commande</a>
+  <a href="Acces_Runner.html">Accès Runner</a>
+  <a href="Livraison.html">Livraison</a>
+  <a href="priv.html">Accès Privé</a>
+</div>
+
+<div class="menu-btn" onclick="openMenu()">☰ Menu</div>
+
+<div class="container">
+<h1>Livraison</h1>
+
+<label for="endroitSelect">Choisir un endroit :</label>
+<select id="endroitSelect" onchange="afficherCommandes()">
+    <option value="">-- Sélectionner --</option>
+    <option value="Poutinerie">Poutinerie</option>
+    <option value="Principale">Principale</option>
+    <option value="Bar Kepler">Bar Kepler</option>
+    <option value="Sud">Sud</option>
+    <option value="Bar Simply">Bar Simply</option>
+    <option value="Bar TDD">Bar TDD</option>
+    <option value="Zone TDD">Zone TDD</option>
+    <option value="Loges">Loges</option>
+    <option value="Rackeurs">Rackeurs</option>
+</select>
+
+<div id="livraisonContainer"></div>
+</div>
+
+<script>
+// Menu
+function openMenu() { document.getElementById("sidemenu").style.width="250px"; document.querySelector(".container").style.marginLeft="250px"; }
+function closeMenu() { document.getElementById("sidemenu").style.width="0"; document.querySelector(".container").style.marginLeft="0"; }
+
+const container = document.getElementById("livraisonContainer");
+
+function afficherCommandes(){
+    const endroit = document.getElementById("endroitSelect").value;
+    let commandes = JSON.parse(localStorage.getItem("commandes")) || [];
+    container.innerHTML = "";
+    if(!endroit) return;
+    const commandesEndroit = commandes.filter(c => c.endroit === endroit);
+    if(commandesEndroit.length === 0){ container.innerHTML = "<p>Aucune commande pour cet endroit.</p>"; return; }
+    const table = document.createElement("table");
+    table.innerHTML = `<thead><tr><th>Produit</th><th>Quantité</th><th>Status</th><th>Actions</th></tr></thead>`;
+    const tbody = document.createElement("tbody");
+    commandesEndroit.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.className = c.status==="encours"?"encours":"";
+        tr.innerHTML=`
+            <td class="${c.urgent?'urgent':''}">${c.produit}</td>
+            <td>${c.quantite}</td>
+            <td class="status">${c.status==="encours"?"En cours":"Non en cours"}</td>
+            <td>${c.status!=="encours"?`<button class="btn btn-annuler" data-id="${c.id}">Annuler</button>`:""}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    container.appendChild(table);
+
+    const boutonsAnnuler = container.querySelectorAll(".btn-annuler");
+    boutonsAnnuler.forEach(btn=>{
+        btn.addEventListener("click", function(){
+            const id = this.getAttribute("data-id");
+            terminerCommande(id);
+        });
+    });
+}
+
+function terminerCommande(id){
+    let commandes = JSON.parse(localStorage.getItem("commandes"))||[];
+    commandes = commandes.filter(c => c.id !== id);
+    localStorage.setItem("commandes", JSON.stringify(commandes));
+    afficherCommandes();
+}
+
+setInterval(afficherCommandes, 1000);
+</script>
+
+</body>
+</html>
